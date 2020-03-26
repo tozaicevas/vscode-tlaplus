@@ -1,24 +1,20 @@
-import * as vscode from 'vscode';
 import * as path from 'path';
-import { CMD_CHECK_MODEL_RUN, CMD_CHECK_MODEL_STOP, CMD_CHECK_MODEL_DISPLAY, CMD_SHOW_TLC_OUTPUT,
-    CMD_CHECK_MODEL_CUSTOM_RUN, checkModel, displayModelChecking, stopModelChecking,
-    showTlcOutput, checkModelCustom, CMD_CHECK_MODEL_RUN_AGAIN, runLastCheckAgain} from './commands/checkModel';
-import { CMD_EVALUATE_SELECTION, evaluateSelection, CMD_EVALUATE_EXPRESSION,
-    evaluateExpression } from './commands/evaluateExpression';
-import { parseModule, CMD_PARSE_MODULE } from './commands/parseModule';
-import { visualizeTlcOutput, CMD_VISUALIZE_TLC_OUTPUT } from './commands/visualizeOutput';
-import { exportModuleToTex, exportModuleToPdf, CMD_EXPORT_TLA_TO_TEX,
-    CMD_EXPORT_TLA_TO_PDF } from './commands/exportModule';
-import { TlaOnTypeFormattingEditProvider } from './formatters/tla';
-import { CfgOnTypeFormattingEditProvider } from './formatters/cfg';
+import * as vscode from 'vscode';
 import { TlaCodeActionProvider } from './actions';
-import { TlaDocumentSymbolsProvider } from './symbols/tlaSymbols';
-import { LANG_TLAPLUS, LANG_TLAPLUS_CFG, exists, readFile, writeFile } from './common';
-import { TlaCompletionItemProvider } from './completions/tlaCompletions';
+import { checkModel, checkModelCustom, CMD_CHECK_MODEL_CUSTOM_RUN, CMD_CHECK_MODEL_DISPLAY, CMD_CHECK_MODEL_RUN, CMD_CHECK_MODEL_RUN_AGAIN, CMD_CHECK_MODEL_RUN_DEADLOCK, CMD_CHECK_MODEL_STOP, CMD_SHOW_TLC_OUTPUT, displayModelChecking, runLastCheckAgain, showTlcOutput, stopModelChecking } from './commands/checkModel';
+import { CMD_EVALUATE_EXPRESSION, CMD_EVALUATE_SELECTION, evaluateExpression, evaluateSelection } from './commands/evaluateExpression';
+import { CMD_EXPORT_TLA_TO_PDF, CMD_EXPORT_TLA_TO_TEX, exportModuleToPdf, exportModuleToTex } from './commands/exportModule';
+import { CMD_PARSE_MODULE, parseModule } from './commands/parseModule';
+import { listenTlcStatConfigurationChanges, syncTlcStatisticsSetting } from './commands/tlcStatisticsCfg';
+import { CMD_VISUALIZE_TLC_OUTPUT, visualizeTlcOutput } from './commands/visualizeOutput';
+import { exists, LANG_TLAPLUS, LANG_TLAPLUS_CFG, readFile, writeFile } from './common';
 import { CfgCompletionItemProvider } from './completions/cfgCompletions';
+import { TlaCompletionItemProvider } from './completions/tlaCompletions';
 import { TlaDeclarationsProvider, TlaDefinitionsProvider } from './declarations/tlaDeclarations';
+import { CfgOnTypeFormattingEditProvider } from './formatters/cfg';
+import { TlaOnTypeFormattingEditProvider } from './formatters/tla';
 import { TlaDocumentInfos } from './model/documentInfo';
-import { syncTlcStatisticsSetting, listenTlcStatConfigurationChanges } from './commands/tlcStatisticsCfg';
+import { TlaDocumentSymbolsProvider } from './symbols/tlaSymbols';
 
 const TLAPLUS_FILE_SELECTOR: vscode.DocumentSelector = { scheme: 'file', language: LANG_TLAPLUS };
 const TLAPLUS_CFG_FILE_SELECTOR: vscode.DocumentSelector = { scheme: 'file', language: LANG_TLAPLUS_CFG };
@@ -47,6 +43,9 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand(
             CMD_CHECK_MODEL_RUN,
             (uri) => checkModel(uri, diagnostic, context)),
+        vscode.commands.registerCommand(
+            CMD_CHECK_MODEL_RUN_DEADLOCK,
+            (uri) => checkModel(uri, diagnostic, context, true)),
         vscode.commands.registerCommand(
             CMD_CHECK_MODEL_RUN_AGAIN,
             () => runLastCheckAgain(diagnostic, context)),

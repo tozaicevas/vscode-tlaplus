@@ -1,8 +1,8 @@
-import * as vscode from 'vscode';
-import * as path from 'path';
 import * as cp from 'child_process';
-import * as fs from 'fs';
 import { ChildProcess, spawn } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as vscode from 'vscode';
 import { pathToUri } from './common';
 import { JavaVersionParser } from './parsers/javaVersion';
 
@@ -87,12 +87,17 @@ export async function runTex(tlaFilePath: string): Promise<ToolProcessInfo> {
     );
 }
 
-export async function runTlc(tlaFilePath: string, cfgFilePath: string): Promise<ToolProcessInfo> {
+export async function runTlc(tlaFilePath: string, cfgFilePath: string, ignoreDeadlock?: boolean): Promise<ToolProcessInfo> {
     const customOptions = getConfigOptions(CFG_TLC_OPTIONS);
+    const customOptionsWithPossibleDeadlock = ( () => {
+        if (!ignoreDeadlock)
+            return customOptions;
+        return (customOptions.some(x => x == "-deadlock") ? customOptions : [...customOptions, "-deadlock"]);
+    } )();
     return runTool(
         TlaTool.TLC,
         tlaFilePath,
-        buildTlcOptions(tlaFilePath, cfgFilePath, customOptions),
+        buildTlcOptions(tlaFilePath, cfgFilePath, customOptionsWithPossibleDeadlock),
         [ /*'-Dtlc2.TLC.ide=vscode'*/ ]
     );
 }

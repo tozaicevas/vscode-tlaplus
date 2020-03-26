@@ -1,17 +1,18 @@
-import * as vscode from 'vscode';
-import * as path from 'path';
-import { copyFile } from 'fs';
-import { runTlc, stopProcess } from '../tla2tools';
-import { TlcModelCheckerStdoutParser } from '../parsers/tlc';
-import { updateCheckResultView, revealEmptyCheckResultView, revealLastCheckResultView } from '../checkResultView';
-import { applyDCollection } from '../diagnostic';
 import { ChildProcess } from 'child_process';
-import { saveStreamToFile } from '../outputSaver';
-import { replaceExtension, LANG_TLAPLUS, LANG_TLAPLUS_CFG, listFiles, exists } from '../common';
-import { ModelCheckResultSource, ModelCheckResult, SpecFiles } from '../model/check';
+import { copyFile } from 'fs';
+import * as path from 'path';
+import * as vscode from 'vscode';
+import { revealEmptyCheckResultView, revealLastCheckResultView, updateCheckResultView } from '../checkResultView';
+import { exists, LANG_TLAPLUS, LANG_TLAPLUS_CFG, listFiles, replaceExtension } from '../common';
+import { applyDCollection } from '../diagnostic';
+import { ModelCheckResult, ModelCheckResultSource, SpecFiles } from '../model/check';
 import { ToolOutputChannel } from '../outputChannels';
+import { saveStreamToFile } from '../outputSaver';
+import { TlcModelCheckerStdoutParser } from '../parsers/tlc';
+import { runTlc, stopProcess } from '../tla2tools';
 
 export const CMD_CHECK_MODEL_RUN = 'tlaplus.model.check.run';
+export const CMD_CHECK_MODEL_RUN_DEADLOCK = 'tlaplus.model.check.runDeadlock';
 export const CMD_CHECK_MODEL_RUN_AGAIN = 'tlaplus.model.check.runAgain';
 export const CMD_CHECK_MODEL_CUSTOM_RUN = 'tlaplus.model.check.customRun';
 export const CMD_CHECK_MODEL_STOP = 'tlaplus.model.check.stop';
@@ -38,7 +39,8 @@ class CheckResultHolder {
 export async function checkModel(
     fileUri: vscode.Uri | undefined,
     diagnostic: vscode.DiagnosticCollection,
-    extContext: vscode.ExtensionContext
+    extContext: vscode.ExtensionContext,
+    ignoreDeadlock?: boolean
 ) {
     const uri = fileUri ? fileUri : getActiveEditorFileUri(extContext);
     if (!uri) {
@@ -48,7 +50,7 @@ export async function checkModel(
     if (!specFiles) {
         return;
     }
-    doCheckModel(specFiles, false, extContext, diagnostic);
+    doCheckModel(specFiles, false, extContext, diagnostic, ignoreDeadlock);
 }
 
 export async function runLastCheckAgain(
@@ -154,13 +156,14 @@ export async function doCheckModel(
     specFiles: SpecFiles,
     quiet: boolean,
     extContext: vscode.ExtensionContext,
-    diagnostic: vscode.DiagnosticCollection
+    diagnostic: vscode.DiagnosticCollection,
+    ignoreDeadlock?: boolean
 ): Promise<ModelCheckResult | undefined> {
     try {
         lastCheckFiles = specFiles;
         vscode.commands.executeCommand('setContext', CTX_TLC_CAN_RUN_AGAIN, true);
         updateStatusBarItem(true);
-        const procInfo = await runTlc(specFiles.tlaFilePath, path.basename(specFiles.cfgFilePath));
+        const procInfo = await runTlc(specFiles.tlaFilePath, path.basename(specFiles.cfgFilePath), ignoreDeadlock);
         outChannel.bindTo(procInfo);
         checkProcess = procInfo.process;
         checkProcess.on('close', () => {

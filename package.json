@@ -1,6 +1,6 @@
 {
-    "name": "vscode-tlaplus",
-    "displayName": "TLA+",
+    "name": "vscode-tlaplus-fork",
+    "displayName": "TLA+ fork",
     "version": "1.5.0",
     "description": "TLA+ language support",
     "publisher": "alygin",
@@ -37,6 +37,7 @@
         "onLanguage:tlaplus",
         "onCommand:tlaplus.parse",
         "onCommand:tlaplus.model.check.run",
+        "onCommand:tlaplus.model.check.runDeadlock",
         "onCommand:tlaplus.model.check.customRun",
         "onCommand:tlaplus.exportToTex",
         "onCommand:tlaplus.exportToPdf",
@@ -130,6 +131,11 @@
                 "category": "TLA+"
             },
             {
+                "command": "tlaplus.model.check.runDeadlock",
+                "title": "Check model with TLC (ignore deadlock)",
+                "category": "TLA+"
+            },
+            {
                 "command": "tlaplus.model.check.customRun",
                 "title": "Check model with TLC using non-default config...",
                 "category": "TLA+"
@@ -197,6 +203,10 @@
                     "when": "editorLangId == tlaplus || editorLangId == tlaplus_cfg"
                 },
                 {
+                    "command": "tlaplus.model.check.runDeadlock",
+                    "when": "editorLangId == tlaplus || editorLangId == tlaplus_cfg"
+                },
+                {
                     "command": "tlaplus.model.check.runAgain",
                     "when": "tlaplus.tlc.canRunAgain"
                 },
@@ -226,11 +236,21 @@
                     "command": "tlaplus.model.check.run",
                     "when": "resourceLangId == tlaplus || resourceLangId == tlaplus_cfg",
                     "group": "z_commands"
+                },
+                {
+                    "command": "tlaplus.model.check.runDeadlock",
+                    "when": "editorLangId == tlaplus || editorLangId == tlaplus_cfg",
+                    "group": "z_commands"
                 }
             ],
             "editor/context": [
                 {
                     "command": "tlaplus.model.check.run",
+                    "when": "editorLangId == tlaplus || editorLangId == tlaplus_cfg",
+                    "group": "z_commands"
+                },
+                {
+                    "command": "tlaplus.model.check.runDeadlock",
                     "when": "editorLangId == tlaplus || editorLangId == tlaplus_cfg",
                     "group": "z_commands"
                 },
