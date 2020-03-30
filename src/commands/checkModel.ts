@@ -26,6 +26,7 @@ const TEMPLATE_CFG_PATH = path.resolve(__dirname, '../../../tools/template.cfg')
 
 let checkProcess: ChildProcess | undefined;
 let lastCheckFiles: SpecFiles | undefined;
+let lastCheckIgnoreDeadlock: boolean | undefined;
 const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
 const outChannel = new ToolOutputChannel('TLC', mapTlcOutputLine);
 
@@ -55,7 +56,8 @@ export async function checkModel(
 
 export async function runLastCheckAgain(
     diagnostic: vscode.DiagnosticCollection,
-    extContext: vscode.ExtensionContext
+    extContext: vscode.ExtensionContext,
+    ignoreDeadlock?: boolean
 ) {
     if (!lastCheckFiles) {
         vscode.window.showWarningMessage('No last check to run');
@@ -64,7 +66,7 @@ export async function runLastCheckAgain(
     if (!canRunTlc(extContext)) {
         return;
     }
-    doCheckModel(lastCheckFiles, false, extContext, diagnostic);
+    doCheckModel(lastCheckFiles, false, extContext, diagnostic, ignoreDeadlock);
 }
 
 export async function checkModelCustom(diagnostic: vscode.DiagnosticCollection, extContext: vscode.ExtensionContext) {
@@ -161,6 +163,7 @@ export async function doCheckModel(
 ): Promise<ModelCheckResult | undefined> {
     try {
         lastCheckFiles = specFiles;
+        lastCheckIgnoreDeadlock = ignoreDeadlock;
         vscode.commands.executeCommand('setContext', CTX_TLC_CAN_RUN_AGAIN, true);
         updateStatusBarItem(true);
         const procInfo = await runTlc(specFiles.tlaFilePath, path.basename(specFiles.cfgFilePath), ignoreDeadlock);

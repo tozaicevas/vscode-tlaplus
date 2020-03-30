@@ -91,7 +91,7 @@ export async function runTlc(tlaFilePath: string, cfgFilePath: string, ignoreDea
     const customOptions = getConfigOptions(CFG_TLC_OPTIONS);
     const customOptionsWithPossibleDeadlock = ( () => {
         if (!ignoreDeadlock)
-            return customOptions;
+            return customOptions.filter(x => x === "-deadlock");
         return (customOptions.some(x => x == "-deadlock") ? customOptions : [...customOptions, "-deadlock"]);
     } )();
     return runTool(

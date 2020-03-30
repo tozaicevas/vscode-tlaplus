@@ -48,7 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
             (uri) => checkModel(uri, diagnostic, context, true)),
         vscode.commands.registerCommand(
             CMD_CHECK_MODEL_RUN_AGAIN,
-            () => runLastCheckAgain(diagnostic, context)),
+            (ignoreDeadlock?: boolean) => runLastCheckAgain(diagnostic, context, ignoreDeadlock)),
         vscode.commands.registerCommand(
             CMD_CHECK_MODEL_CUSTOM_RUN,
             () => checkModelCustom(diagnostic, context)),

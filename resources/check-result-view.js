@@ -79,9 +79,10 @@ function stopProcess() {
     });
 }
 
-function runCheckAgain() {
+function runCheckAgain(checkDeadlock) {
     vscode.postMessage({
-        command: 'runAgain'
+        command: 'runAgain',
+        ignoreDeadlock: !checkDeadlock 
     });
 }
 
@@ -159,6 +160,7 @@ function displayStatusHeader(showActions, stillRunning) {
     const elActions = document.getElementById('actions');
     const elShowOutput = document.getElementById('act-show-output');
     const elRunAgain = document.getElementById('act-run-again');
+    const elCheckDeadlock = document.getElementById('checkDeadlock');
     if (showActions) {
         elActions.classList.remove('hidden');
         elShowOutput.onclick = () => showTlcOutput();
@@ -170,7 +172,7 @@ function displayStatusHeader(showActions, stillRunning) {
         delete elRunAgain.onclick;
         elRunAgain.classList.add('hidden');
     } else {
-        elRunAgain.onclick = () => runCheckAgain();
+        elRunAgain.onclick = () => runCheckAgain(elCheckDeadlock.checked);
         elRunAgain.classList.remove('hidden');
     }
 }
